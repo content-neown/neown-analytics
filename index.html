@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>neOwn Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">n</div>
+        <div>
+          <div class="logo-title">neOwn Analytics</div>
+          <div class="logo-sub">Performance Marketing</div>
+        </div>
+      </div>
+
+      <div class="month-tabs" id="monthTabs">
+        <span class="tab-loading">Loading sheets…</span>
+      </div>
+
+      <div class="status-dot" id="statusDot">
+        <span class="dot dot--idle"></span>
+        <span class="status-text" id="statusText">—</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Error bar -->
+    <div class="error-bar" id="errorBar" hidden>
+      <span id="errorMsg"></span>
+    </div>
+
+    <!-- Setup hint -->
+    <div class="setup-hint" id="setupHint" hidden>
+      <div class="setup-icon">📊</div>
+      <div class="setup-title">Connect your Google Sheet</div>
+      <div class="setup-body">Add <code>GOOGLE_SHEETS_API_KEY</code> and <code>SHEET_ID</code> to Vercel Environment Variables, then redeploy.</div>
+    </div>
+
+    <!-- KPI cards -->
+    <section class="kpi-grid" id="kpiGrid"></section>
+
+    <!-- Charts -->
+    <section class="charts-grid" id="chartsGrid">
+      <div class="chart-card">
+        <div class="chart-label">Daily Spends incl. GST</div>
+        <div class="chart-wrap"><canvas id="cSpends"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">Daily Revenue</div>
+        <div class="chart-wrap"><canvas id="cRevenue"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">Daily DB Purchases</div>
+        <div class="chart-wrap"><canvas id="cPurchases"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">ROAS Trend</div>
+        <div class="chart-wrap"><canvas id="cROAS"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">CPS Trend (Cost per Subscription)</div>
+        <div class="chart-wrap"><canvas id="cCPS"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-label">FB CTR % &amp; CPM ₹</div>
+        <div class="chart-wrap"><canvas id="cCTR"></canvas></div>
+      </div>
+    </section>
+
+    <!-- AI Insights -->
+    <section class="insights-card" id="insightsCard">
+      <div class="insights-header">
+        <div>
+          <div class="insights-title">AI Insights</div>
+          <div class="insights-sub" id="insightsSub">Claude-powered analysis</div>
+        </div>
+        <button class="btn-insights" id="insightsBtn" onclick="generateInsights()">✨ Generate Insights</button>
+      </div>
+      <div id="insightsBody">
+        <div class="insights-empty">Click "Generate Insights" to get AI-powered analysis of the selected month.</div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── CHATBOT ── -->
+  <button class="chat-bubble" id="chatBubble" onclick="toggleChat()" aria-label="Open chat">💬</button>
+
+  <div class="chat-window" id="chatWindow">
+    <div class="chat-head">
+      <div>
+        <div class="chat-head-title">neOwn Analytics Bot</div>
+        <div class="chat-head-sub">Ask about your data</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg msg--bot">Hi! Ask me anything about this month's performance data 📊</div>
+    </div>
+    <div class="chat-starters" id="chatStarters">
+      <button class="starter" onclick="sendChat('What was the best performing day?')">Best day?</button>
+      <button class="starter" onclick="sendChat('How does FB ROAS compare to Google?')">FB vs Google ROAS?</button>
+      <button class="starter" onclick="sendChat('Which channel has lower CPS?')">Lower CPS?</button>
+      <button class="starter" onclick="sendChat('What is the ROAS trend this month?')">ROAS trend?</button>
+    </div>
+    <div class="chat-footer">
+      <input class="chat-input" id="chatInput" type="text" placeholder="Ask about your data…"
+             onkeydown="if(event.key==='Enter') sendChat()" />
+      <button class="chat-send" onclick="sendChat()">↑</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
