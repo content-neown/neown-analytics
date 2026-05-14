@@ -132,7 +132,7 @@ function parseSheetDate(name) {
    TOOLTIP FACTORY
    Dark, styled tooltips with per-chart value formatting
    ══════════════════════════════════════════════════════════════ */
-function makeTooltip(labelFn) {
+function makeTooltip(labelFn, titleLabels) {
   return {
     mode: 'index',
     intersect: false,
@@ -146,6 +146,9 @@ function makeTooltip(labelFn) {
     titleFont: { family: 'Inter', size: 11, weight: '600' },
     bodyFont:  { family: 'Inter', size: 11 },
     callbacks: {
+      title: titleLabels
+        ? items => titleLabels[items[0].dataIndex] ?? items[0].label
+        : undefined,
       label: ctx => labelFn
         ? labelFn(ctx.raw, ctx)
         : `  ${ctx.dataset.label}: ${ctx.formattedValue}`,
@@ -166,7 +169,7 @@ const ttNum  = (v, c) => `  ${c.dataset.label}: ${fNum(v)}`;
 const ttDPct = (v, c) => `  ${c.dataset.label}: ${v >= 0 ? '+' : ''}${(+v || 0).toFixed(1)}%`;
 
 /* Mixed tooltip for charts with 2 y-axes */
-function mixedTooltip(fns) {
+function mixedTooltip(fns, titleLabels) {
   return {
     mode: 'index',
     intersect: false,
@@ -180,6 +183,9 @@ function mixedTooltip(fns) {
     titleFont: { family: 'Inter', size: 11, weight: '600' },
     bodyFont:  { family: 'Inter', size: 11 },
     callbacks: {
+      title: titleLabels
+        ? items => titleLabels[items[0].dataIndex] ?? items[0].label
+        : undefined,
       label: ctx => {
         const fn = fns[ctx.datasetIndex] || ((v, c) => `  ${c.dataset.label}: ${c.formattedValue}`);
         return fn(ctx.raw, ctx);
@@ -490,7 +496,8 @@ function renderPerDayView() {
 }
 
 function renderPerDayCharts(data) {
-  const labels = data.map(d => shortDate(d.date));
+  const labels    = data.map(d => shortDate(d.date));
+  const fullDates = data.map(d => String(d.date));   // full date shown in tooltip title
   const xA = xAxis(labels);
 
   // 1. Spends
@@ -504,7 +511,7 @@ function renderPerDayCharts(data) {
         { label: 'Google',   data: data.map(d => d.googleSpends), borderColor: INDIGO,    borderWidth: 1.5, pointRadius: 0, tension: .3 },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yINR) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yINR) } },
   });
 
   // 2. Revenue
@@ -517,7 +524,7 @@ function renderPerDayCharts(data) {
         { label: 'Attribution Revenue', data: data.map(d => d.revenue),        borderColor: PINK,   borderWidth: 2, pointRadius: 0, tension: .3 },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yINR) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yINR) } },
   });
 
   // 3. Purchases
@@ -530,7 +537,7 @@ function renderPerDayCharts(data) {
         { label: 'Google',   data: data.map(d => d.googleDBPurchase), backgroundColor: INDIGO, borderRadius: 3 },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttNum) }, scales: { x: xA, y: yAxis(yNum) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttNum, fullDates) }, scales: { x: xA, y: yAxis(yNum) } },
   });
 
   // 4. ROAS
@@ -544,7 +551,7 @@ function renderPerDayCharts(data) {
         { label: 'Google ROAS', data: data.map(d => +d.googleROAS.toFixed(2)), borderColor: INDIGO,    borderWidth: 1.5, pointRadius: 0, tension: .3, borderDash: [5,3] },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttX) }, scales: { x: xA, y: yAxis(yX) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttX, fullDates) }, scales: { x: xA, y: yAxis(yX) } },
   });
 
   // 5. CPS
@@ -558,7 +565,7 @@ function renderPerDayCharts(data) {
         { label: 'Google CPS', data: data.map(d => Math.round(d.googleDBCPS)), borderColor: INDIGO,    borderWidth: 1.5, pointRadius: 0, tension: .3 },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yRs) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yRs) } },
   });
 
   // 6. CTR + CPM (dual axis)
@@ -573,7 +580,7 @@ function renderPerDayCharts(data) {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: baseLegend(), tooltip: mixedTooltip([ttPct, ttINR]) },
+      plugins: { legend: baseLegend(), tooltip: mixedTooltip([ttPct, ttINR], fullDates) },
       scales: {
         x: xA,
         y:  { ...yAxis(yPct), position: 'left' },
@@ -636,7 +643,7 @@ async function renderMonthlyView() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: baseLegend(), tooltip: mixedTooltip([ttINR, ttINR, ttX]) },
+      plugins: { legend: baseLegend(), tooltip: mixedTooltip([ttINR, ttINR, ttX], labels) },
       scales: {
         x: xA,
         y:  { ...yAxis(yINR), position: 'left' },
@@ -743,6 +750,12 @@ async function renderMoMView() {
   const pD = prev.chartData;
   const n  = Math.max(cD.length, pD.length);
   const labels = Array.from({ length: n }, (_, i) => `Day ${i + 1}`);
+  // Tooltip title shows actual dates from both months
+  const fullDates = Array.from({ length: n }, (_, i) => {
+    const cd = cD[i] ? cD[i].date : '—';
+    const pd = pD[i] ? pD[i].date : '—';
+    return `Day ${i + 1}  ·  ${cd}  /  ${pd}`;
+  });
   const xA = xAxis(labels);
 
   const currColor = PINK;
@@ -771,7 +784,7 @@ async function renderMoMView() {
         moMLine(pD, 'totalSpends',  prevName,     prevColor, true),
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yINR) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yINR) } },
   });
 
   // 2. Shopify Revenue MoM
@@ -784,7 +797,7 @@ async function renderMoMView() {
         moMLine(pD, 'shopifyRevenue', prevName,     IND_L,   true),
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yINR) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yINR) } },
   });
 
   // 3. Purchases MoM (FB + Google both months)
@@ -799,7 +812,7 @@ async function renderMoMView() {
         { label: `${prevName} Google`,     data: pD.map(d => d.googleDBPurchase), borderColor: IND_L,  borderWidth: 1.5, pointRadius: 0, tension: .3, borderDash: [5,4] },
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttNum) }, scales: { x: xA, y: yAxis(yNum) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttNum, fullDates) }, scales: { x: xA, y: yAxis(yNum) } },
   });
 
   // 4. ROAS MoM
@@ -812,7 +825,7 @@ async function renderMoMView() {
         moMLine(pD.map(d => ({ roas: +d.roas.toFixed(2) })), 'roas', prevName,     GRAY, true),
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttX) }, scales: { x: xA, y: yAxis(yX) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttX, fullDates) }, scales: { x: xA, y: yAxis(yX) } },
   });
 
   // 5. CPS MoM
@@ -825,7 +838,7 @@ async function renderMoMView() {
         moMLine(pD.map(d => ({ cps: Math.round(d.totalDBCPS) })), 'cps', prevName,     GRAY, true),
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR) }, scales: { x: xA, y: yAxis(yRs) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttINR, fullDates) }, scales: { x: xA, y: yAxis(yRs) } },
   });
 
   // 6. CTR MoM
@@ -838,7 +851,7 @@ async function renderMoMView() {
         moMLine(pD.map(d => ({ ctr: +d.fbCTR.toFixed(2) })), 'ctr', prevName,     PINK_L, true),
       ],
     },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttPct) }, scales: { x: xA, y: yAxis(yPct) } },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: baseLegend(), tooltip: makeTooltip(ttPct, fullDates) }, scales: { x: xA, y: yAxis(yPct) } },
   });
 }
 
@@ -874,11 +887,12 @@ function renderDoDView() {
     };
   });
 
-  const labels = dod.map(d => shortDate(d.date));
+  const labels    = dod.map(d => shortDate(d.date));
+  const fullDates = dod.map(d => String(d.date));
   const xA = xAxis(labels);
-  const opts = (ds) => ({
+  const opts = () => ({
     responsive: true, maintainAspectRatio: false,
-    plugins: { legend: baseLegend(), tooltip: makeTooltip(ttDPct) },
+    plugins: { legend: baseLegend(), tooltip: makeTooltip(ttDPct, fullDates) },
     scales: { x: xA, y: yAxis(yDPct) },
   });
 
