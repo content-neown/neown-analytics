@@ -9,6 +9,7 @@
   --gray-50:  #F9FAFB;
   --gray-100: #F3F4F6;
   --gray-200: #E5E7EB;
+  --gray-300: #D1D5DB;
   --gray-400: #9CA3AF;
   --gray-500: #6B7280;
   --gray-700: #374151;
@@ -130,6 +131,51 @@ code   { font-family: monospace; background: var(--gray-100); padding: 1px 5px; 
 .setup-title { font-weight: 700; font-size: 15px; color: var(--indigo); margin-bottom: 6px; }
 .setup-body  { font-size: 12px; color: var(--indigo); opacity: .7; }
 
+/* ── View Bar ── */
+.view-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.view-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  border: 1.5px solid var(--gray-200);
+  background: var(--white);
+  transition: all .15s;
+  cursor: pointer;
+  letter-spacing: .01em;
+}
+.view-btn:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  border-color: var(--gray-300);
+}
+.view-btn.active {
+  background: var(--pink);
+  border-color: var(--pink-dark);
+  color: white;
+  box-shadow: 0 2px 8px rgba(240,0,140,.25);
+}
+
+/* View label in header (optional indicator) */
+.view-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--gray-400);
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--gray-100);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
 /* ── KPI Grid ── */
 .kpi-grid {
   display: grid;
@@ -159,6 +205,14 @@ code   { font-family: monospace; background: var(--gray-100); padding: 1px 5px; 
   margin-bottom: 4px;
 }
 .kpi-card.accent .kpi-label { color: rgba(255,255,255,.6); }
+
+/* KPI value row — value + delta side by side */
+.kpi-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
 .kpi-value {
   font-size: 20px;
   font-weight: 700;
@@ -166,6 +220,28 @@ code   { font-family: monospace; background: var(--gray-100); padding: 1px 5px; 
   line-height: 1.2;
 }
 .kpi-card.accent .kpi-value { color: white; }
+
+/* KPI delta badges */
+.kpi-delta { line-height: 1; }
+.kpi-delta-up {
+  font-size: 10px;
+  font-weight: 700;
+  color: #10B981;
+  background: #D1FAE5;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.kpi-delta-down {
+  font-size: 10px;
+  font-weight: 700;
+  color: #EF4444;
+  background: #FEE2E2;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+.kpi-card.accent .kpi-delta-up   { background: rgba(16,185,129,.25); color: #6EE7B7; }
+.kpi-card.accent .kpi-delta-down { background: rgba(239,68,68,.25);  color: #FCA5A5; }
+
 .kpi-sub {
   font-size: 10px;
   color: var(--gray-400);
@@ -215,6 +291,21 @@ code   { font-family: monospace; background: var(--gray-100); padding: 1px 5px; 
   height: 200px;
 }
 .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+
+/* Chart message overlay (e.g. "No previous month available") */
+.chart-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: var(--gray-400);
+  background: rgba(255,255,255,.85);
+  border-radius: var(--radius-sm);
+  text-align: center;
+  padding: 12px;
+}
 
 /* ── AI Insights ── */
 .insights-card {
@@ -476,4 +567,5 @@ code   { font-family: monospace; background: var(--gray-100); padding: 1px 5px; 
   .chat-window { width: calc(100vw - 16px); right: 8px; }
   .header-inner { gap: 8px; }
   .logo-sub { display: none; }
+  .view-btn { padding: 5px 10px; font-size: 10px; }
 }
