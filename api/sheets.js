@@ -1,6 +1,7 @@
-const SHEET_ID = process.env.SHEET_ID || '13q9R1M2RAxSQ5rsujRLDOtO-ip-eH6eH8Or-_9ZjiTQ';
-const API_KEY  = process.env.GOOGLE_SHEETS_API_KEY;
-const BASE     = 'https://sheets.googleapis.com/v4/spreadsheets';
+const SHEET_ID         = process.env.SHEET_ID         || '13q9R1M2RAxSQ5rsujRLDOtO-ip-eH6eH8Or-_9ZjiTQ';
+const REVENUE_SHEET_ID = process.env.REVENUE_SHEET_ID || '';
+const API_KEY          = process.env.GOOGLE_SHEETS_API_KEY;
+const BASE             = 'https://sheets.googleapis.com/v4/spreadsheets';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,11 +12,20 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  const { action, sheet } = req.query;
+  const { action, sheet, source } = req.query;
+  const isRevenue = source === 'revenue';
+
+  if (isRevenue && !REVENUE_SHEET_ID) {
+    return res.status(500).json({
+      error: 'REVENUE_SHEET_ID is not set. Add it in Vercel → Settings → Environment Variables.'
+    });
+  }
+
+  const sheetId = isRevenue ? REVENUE_SHEET_ID : SHEET_ID;
 
   try {
     if (action === 'list') {
-      const url  = `${BASE}/${SHEET_ID}?key=${API_KEY}&fields=sheets.properties.title`;
+      const url  = `${BASE}/${sheetId}?key=${API_KEY}&fields=sheets.properties.title`;
       const resp = await fetch(url);
       const data = await resp.json();
       if (data.error) throw new Error(data.error.message || 'Sheets API error');
@@ -25,7 +35,7 @@ module.exports = async function handler(req, res) {
 
     if (sheet) {
       const range = encodeURIComponent(sheet);
-      const url   = `${BASE}/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+      const url   = `${BASE}/${sheetId}/values/${range}?key=${API_KEY}`;
       const resp  = await fetch(url);
       const data  = await resp.json();
       if (data.error) throw new Error(data.error.message || 'Sheets API error');
